@@ -15,7 +15,9 @@ module Danger
   #      scheme: 'EasyPeasy',
   #      workspace: 'Example/EasyPeasy.xcworkspace',
   #      exclude_targets: 'Demo.app',
-  #      minimum_coverage_percentage: 90
+  #      minimum_coverage_percentage: 90,
+  #      minimum_coverage_percentage_for_changed_files: 80.0,
+  #      filename_prefix_ignore_list: ['View', 'Cell', 'Layout', 'Action', 'State'],
   #    )
   #
   # @tags xcode, coverage, xccoverage, tests, ios, xcov
@@ -35,7 +37,7 @@ module Danger
       # Run xcov to produce a processed report
       report = produce_report(*args)
       # Output the processed report
-      output_report(report)
+      output_report(report, *args)
     end
   
     # Produces and processes a report for use in the report method
@@ -74,7 +76,7 @@ module Danger
     end
 
     # Outputs a processed report with Danger
-    def output_report(report)
+    def output_report(report, *args)
       # Create markdown
       report_markdown = report.markdown_value
 
@@ -85,6 +87,29 @@ module Danger
       threshold = Xcov.config[:minimum_coverage_percentage].to_i
       if !threshold.nil? && (report.coverage * 100) < threshold
         fail("Code coverage under minimum of #{threshold}%")
+      end
+
+      # Notify failure if minimum coverage hasn't been reached for modified/added files
+      file_threshold = args.first[:minimum_coverage_percentage_for_changed_files].to_i
+      ignore_list = args.first[:filename_prefix_ignore_list]
+      if !file_threshold.nil?
+        report.targets.each do |target|
+          target.files.each do |file|
+            if ((file.coverage * 100) < file_threshold) #check if file coverage is less than that defined
+              if !ignore_list.nil? #check is ignore list is provided or not
+                ignore_list.each do |ignore|
+                  if (!file.name.include? ignore)
+                    fail("Class code coverage is below minimum. Improve #{file.name} to at least #{file_threshold}%")
+                  else
+                    puts("File #{file.name} is being skipped from minimum code coverage because it contains '#{ignore}' keyword.")
+                  end
+                end
+              else
+                fail("Class code coverage is below minimum, please improve #{file.name} to at least #{file_threshold}%")
+              end
+            end
+          end
+        end
       end
     end
 
@@ -110,6 +135,8 @@ module Danger
     def convert_options(options)
       converted_options = options.dup
       converted_options.delete(:verbose)
+      converted_options.delete(:minimum_coverage_percentage_for_changed_files)
+      converted_options.delete(:filename_prefix_ignore_list)
       converted_options
     end
 
