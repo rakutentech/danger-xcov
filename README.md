@@ -32,7 +32,7 @@ xcov.report(
    exclude_targets: 'Demo.app',
    minimum_coverage_percentage: 90,
    minimum_coverage_percentage_for_changed_files: 80,
-   filename_prefix_ignore_list: ['View', 'State']
+   ignore_list_of_minimum_coverage_percentage_for_changed_files: ['View', 'State']
 )
 ```
 
@@ -53,7 +53,7 @@ report = xcov.produce_report(
   exclude_targets: 'Demo.app',
   minimum_coverage_percentage: 90,
   minimum_coverage_percentage_for_changed_files: 80,
-  filename_prefix_ignore_list: ['View', 'State']
+  ignore_list_of_minimum_coverage_percentage_for_changed_files: ['View', 'State']
 )
 
 # Do some custom filtering with the report here
@@ -64,8 +64,8 @@ xcov.output_report(report)
 
 ## Updates in the plugin
 - Added `minimum_coverage_percentage_for_changed_files` parameter to allow minimum coverage for new and modified files only.
-- Added `filename_prefix_ignore_list` parameter to allow skipping files based on the architecture of the project.
-   - For example, if the parameter is like `filename_prefix_ignore_list: ['View', 'State']`, then any filename which contains the word `View` or `State` will be skipped from this coverage check.
+- Added `ignore_list_of_minimum_coverage_percentage_for_changed_files` parameter to allow skipping files based on the architecture of the project.
+   - For example, if the parameter is like `ignore_list_of_minimum_coverage_percentage_for_changed_files: ['View', 'State']`, then any filename which **contains** the word `View` or `State` will be skipped from this coverage check.
 
 ## Linking this custom support to your repo
 Add this to your gemfile instead of `danger-xcov`, point it to this fork.
