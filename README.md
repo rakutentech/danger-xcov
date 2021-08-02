@@ -13,12 +13,6 @@
 [xcov](https://github.com/nakiostudio/xcov), a friendly visualizer for Xcode's
 code coverage files.
 
-<h3 align="center">
-  <a href="https://grnh.se/5f21b9701">
-    <img src="/assets_readme/monzo.png" alt="Join me and the amazing Mobile Team at monzo"/>
-  </a>
-</h3>
-
 ## Installation
 
 ```
@@ -36,7 +30,9 @@ xcov.report(
    scheme: 'EasyPeasy',
    workspace: 'Example/EasyPeasy.xcworkspace',
    exclude_targets: 'Demo.app',
-   minimum_coverage_percentage: 90
+   minimum_coverage_percentage: 90,
+   minimum_coverage_percentage_for_changed_files: 80,
+   ignore_list_of_minimum_coverage_percentage_for_changed_files: ['View', 'State']
 )
 ```
 
@@ -55,13 +51,26 @@ report = xcov.produce_report(
   scheme: 'EasyPeasy',
   workspace: 'Example/EasyPeasy.xcworkspace',
   exclude_targets: 'Demo.app',
-  minimum_coverage_percentage: 90
+  minimum_coverage_percentage: 90,
+  minimum_coverage_percentage_for_changed_files: 80,
+  ignore_list_of_minimum_coverage_percentage_for_changed_files: ['View', 'State']
 )
 
 # Do some custom filtering with the report here
 
 # Post markdown report
 xcov.output_report(report)
+```
+
+## Updates in the plugin
+- Added `minimum_coverage_percentage_for_changed_files` parameter to allow minimum coverage for new and modified files only.
+- Added `ignore_list_of_minimum_coverage_percentage_for_changed_files` parameter to allow skipping files based on the architecture of the project.
+   - For example, if the parameter is like `ignore_list_of_minimum_coverage_percentage_for_changed_files: ['View', 'State']`, then any filename which **contains** the word `View` or `State` will be skipped from this coverage check.
+
+## Linking this custom support to your repo
+Add this to your gemfile instead of `danger-xcov`, point it to this fork.
+```ruby
+gem 'danger-xcov', :git => 'https://github.com/rakutentech/danger-xcov.git'
 ```
 
 ## License
