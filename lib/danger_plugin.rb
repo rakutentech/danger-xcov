@@ -96,7 +96,7 @@ module Danger
       if file_threshold > 0
         report.targets.each do |target|
           target_files = target.files.select { |file| ignore_list.none? { |contains| file.name.include? contains } }
-          violations = target_files.select { |file| file.coverage * 100) < file_threshold}
+          violations = target_files.select { |file| (file.coverage * 100) < file_threshold }
           fail("Class code coverage is below minimum, please improve #{violations.map {|f| f.name }} to at least #{file_threshold}%.") if !violations.empty?
         end
       end
