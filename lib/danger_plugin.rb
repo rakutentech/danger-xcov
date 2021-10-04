@@ -78,7 +78,13 @@ module Danger
     # Outputs a processed report with Danger
     def output_report(report, *args)
       # Create markdown
-      report_markdown = report.markdown_value
+      display_only_average_coverage = args.first[:display_only_average_coverage] || false
+      average_coverage_target_diplay_name = args.first[:average_coverage_target_diplay_name] || ""
+      if display_only_average_coverage
+        report_markdown = average_coverage_markdown_value(report.targets, average_coverage_target_diplay_name, report.displayable_coverage)
+      else
+        report_markdown = report.markdown_value
+      end
 
       # Send markdown
       markdown(report_markdown)
@@ -126,7 +132,36 @@ module Danger
       converted_options.delete(:verbose)
       converted_options.delete(:minimum_coverage_percentage_for_changed_files)
       converted_options.delete(:ignore_list_of_minimum_coverage_percentage_for_changed_files)
+      converted_options.delete(:display_only_average_coverage)
+      converted_options.delete(:average_coverage_target_diplay_name)
       converted_options
+    end
+
+    # Create markdown value for average coverage of all targets
+    def average_coverage_markdown_value(targets, target_diplay_name, displayable_coverage)
+      markdown = "## Current coverage for #{target_diplay_name} is `#{displayable_coverage}`\n"
+      if target_diplay_name.length == 0
+        markdown = "## Current coverage is `#{displayable_coverage}`\n"
+      end
+      changed_files_markdown = "#{targets.map { |target| each_target_changed_files_coverage_markdown_value(target.files) }.join("")}"
+      if changed_files_markdown.length > 0
+        markdown << "#{changed_files_markdown}"
+      else
+        markdown << "✅ *No files affecting coverage found*\n\n---\n"
+      end
+      markdown <<  "\n> Powered by [xcov](https://github.com/nakiostudio/xcov)"
+
+      markdown
+    end
+
+    # Creage markdown value for changed files in each target
+    def each_target_changed_files_coverage_markdown_value(files)
+      markdown = ""
+      return markdown if files.empty?
+      markdown << "Files changed | - | - \n--- | --- | ---\n"
+      markdown << "#{files.map { |file| file.markdown_value }.join("")}\n---\n"
+
+      markdown
     end
 
     private :xcov_available?, :process_report
